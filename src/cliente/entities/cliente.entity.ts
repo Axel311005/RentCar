@@ -1,0 +1,50 @@
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { User } from '../../user/entities/user.entity';
+import { Reserva } from '../../reserva/entities/reserva.entity';
+
+@Entity({ name: 'clientes' })
+export class Cliente {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar', length: 120, name: 'nombres' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  nombres: string;
+
+  @Column({ type: 'varchar', length: 120, name: 'apellidos' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  apellidos: string;
+
+  @Column({ type: 'varchar', length: 180, unique: true, name: 'email' })
+  @IsEmail()
+  email: string;
+
+  @Column({ type: 'varchar', length: 30, name: 'telefono' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(30)
+  telefono: string;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'fecha_registro' })
+  fechaRegistro: Date;
+
+  @OneToOne(() => User, (user) => user.cliente, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToMany(() => Reserva, (reserva) => reserva.cliente)
+  reservas: Reserva[];
+}
