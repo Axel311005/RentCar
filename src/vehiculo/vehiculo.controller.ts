@@ -11,7 +11,6 @@ import {
 import {
   ApiBody,
   ApiCreatedResponse,
-  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -66,7 +65,7 @@ export class VehiculoController {
 
   @ApiOperation({ summary: 'Eliminar un vehículo por id' })
   @ApiParam({ name: 'id', format: 'uuid', description: 'UUID del vehículo' })
-  @ApiNoContentResponse({ description: 'Vehículo eliminado correctamente.' })
+  @ApiOkResponse({ description: 'Vehículo eliminado correctamente.' })
   @ApiNotFoundResponse({ description: 'Vehículo no encontrado.' })
   @Delete(':id')
   remove(@Param('id', new ParseUUIDPipe()) id: string) {

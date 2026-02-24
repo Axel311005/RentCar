@@ -30,7 +30,11 @@ export class CreateReservaDto {
   @IsDateString()
   fechaFin: string;
 
-  @ApiProperty({ description: 'Cantidad total de días', example: 5, minimum: 1 })
+  @ApiProperty({
+    description: 'Cantidad total de días',
+    example: 5,
+    minimum: 1,
+  })
   @Type(() => Number)
   @IsInt()
   @Min(1)

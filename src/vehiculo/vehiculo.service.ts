@@ -36,14 +36,14 @@ export class VehiculoService {
 
   findAll() {
     return this.vehiculoRepository.find({
-      relations: { categoria: true, reservas: true },
+      relations: { categoria: true, reservas: true, imagenes: true },
     });
   }
 
   async findOne(id: string) {
     const vehiculo = await this.vehiculoRepository.findOne({
       where: { id },
-      relations: { categoria: true, reservas: true },
+      relations: { categoria: true, reservas: true, imagenes: true },
     });
     if (!vehiculo) {
       throw new NotFoundException(`Vehiculo con id ${id} no encontrado`);

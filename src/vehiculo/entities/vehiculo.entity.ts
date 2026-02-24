@@ -11,15 +11,14 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
   Min,
 } from 'class-validator';
 import { Categoria } from '../../categoria/entities/categoria.entity';
 import { Reserva } from '../../reserva/entities/reserva.entity';
 import { VehiculoEstado } from '../enums/vehiculo-estado.enum';
+import { VehiculoImagen } from './vehiculo-imagen.entity';
 
 @Entity({ name: 'vehiculos' })
 export class Vehiculo {
@@ -63,11 +62,6 @@ export class Vehiculo {
   @IsEnum(VehiculoEstado)
   estado: VehiculoEstado;
 
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'imagen_url' })
-  @IsOptional()
-  @IsUrl()
-  imagenUrl?: string;
-
   @Column({ type: 'boolean', default: true, name: 'activo' })
   @IsBoolean()
   activo: boolean;
@@ -80,4 +74,7 @@ export class Vehiculo {
 
   @OneToMany(() => Reserva, (reserva) => reserva.vehiculo)
   reservas: Reserva[];
+
+  @OneToMany(() => VehiculoImagen, (imagen) => imagen.vehiculo)
+  imagenes: VehiculoImagen[];
 }

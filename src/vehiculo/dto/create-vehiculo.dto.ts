@@ -8,7 +8,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
   MaxLength,
   Min,
@@ -28,7 +27,11 @@ export class CreateVehiculoDto {
   @MaxLength(80)
   modelo: string;
 
-  @ApiProperty({ description: 'Año del vehículo', example: 2024, minimum: 1900 })
+  @ApiProperty({
+    description: 'Año del vehículo',
+    example: 2024,
+    minimum: 1900,
+  })
   @Type(() => Number)
   @IsInt()
   @Min(1900)
@@ -58,14 +61,6 @@ export class CreateVehiculoDto {
   @IsOptional()
   @IsEnum(VehiculoEstado)
   estado?: VehiculoEstado;
-
-  @ApiPropertyOptional({
-    description: 'URL de imagen del vehículo',
-    example: 'https://cdn.rentcar.com/vehiculos/rav4.png',
-  })
-  @IsOptional()
-  @IsUrl()
-  imagenUrl?: string;
 
   @ApiPropertyOptional({
     description: 'Indicador de disponibilidad lógica',

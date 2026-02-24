@@ -9,6 +9,7 @@ import { CategoriaModule } from 'src/categoria/categoria.module';
 import { VehiculoModule } from 'src/vehiculo/vehiculo.module';
 import { ReservaModule } from 'src/reserva/reserva.module';
 import { PagoModule } from 'src/pago/pago.module';
+import { VehiculoImagenModule } from 'src/vehiculo-imagen/vehiculo-imagen.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PagoModule } from 'src/pago/pago.module';
     ClienteModule,
     CategoriaModule,
     VehiculoModule,
+    VehiculoImagenModule,
     ReservaModule,
     PagoModule,
   ],
