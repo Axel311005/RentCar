@@ -31,6 +31,17 @@ export class VehiculoImagen {
   @MaxLength(150)
   altText?: string;
 
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    name: 'storage_path',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  storagePath?: string;
+
   @Column({ type: 'boolean', default: false, name: 'es_principal' })
   @IsBoolean()
   esPrincipal: boolean;

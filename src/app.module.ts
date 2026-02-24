@@ -10,6 +10,8 @@ import { VehiculoModule } from 'src/vehiculo/vehiculo.module';
 import { ReservaModule } from 'src/reserva/reserva.module';
 import { PagoModule } from 'src/pago/pago.module';
 import { VehiculoImagenModule } from 'src/vehiculo-imagen/vehiculo-imagen.module';
+import { EmpleadoModule } from 'src/empleado/empleado.module';
+import { AdminModule } from 'src/admin/admin.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { VehiculoImagenModule } from 'src/vehiculo-imagen/vehiculo-imagen.module
     CategoriaModule,
     VehiculoModule,
     VehiculoImagenModule,
+    EmpleadoModule,
+    AdminModule,
     ReservaModule,
     PagoModule,
   ],

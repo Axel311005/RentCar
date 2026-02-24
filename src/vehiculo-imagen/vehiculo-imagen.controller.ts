@@ -3,13 +3,20 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
+  ParseBoolPipe,
+  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -33,6 +40,47 @@ export class VehiculoImagenController {
   @Post()
   create(@Body() createDto: CreateVehiculoImagenDto) {
     return this.vehiculoImagenService.create(createDto);
+  }
+
+  @ApiOperation({ summary: 'Subir imagen al bucket y asociarla a un vehículo' })
+  @ApiParam({
+    name: 'vehiculoId',
+    format: 'uuid',
+    description: 'UUID del vehículo',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        altText: { type: 'string' },
+        esPrincipal: { type: 'boolean' },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiCreatedResponse({ description: 'Imagen subida y creada correctamente.' })
+  @ApiNotFoundResponse({ description: 'Vehículo no encontrado.' })
+  @Post('upload/:vehiculoId')
+  @UseInterceptors(FileInterceptor('file'))
+  upload(
+    @Param('vehiculoId', new ParseUUIDPipe()) vehiculoId: string,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({ fileType: /(jpg|jpeg|png|webp)$/i })
+        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    )
+    file: Express.Multer.File,
+    @Body('altText') altText?: string,
+    @Body('esPrincipal', new ParseBoolPipe({ optional: true }))
+    esPrincipal?: boolean,
+  ) {
+    return this.vehiculoImagenService.uploadAndCreate(vehiculoId, file, {
+      altText,
+      esPrincipal,
+    });
   }
 
   @ApiOperation({ summary: 'Listar todas las imágenes' })

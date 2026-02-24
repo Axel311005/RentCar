@@ -5,6 +5,7 @@ import { VehiculoImagen } from '../vehiculo/entities/vehiculo-imagen.entity';
 import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
 import { CreateVehiculoImagenDto } from './dto/create-vehiculo-imagen.dto';
 import { UpdateVehiculoImagenDto } from './dto/update-vehiculo-imagen.dto';
+import { SupabaseStorageService } from '../storage/supabase-storage.service';
 
 @Injectable()
 export class VehiculoImagenService {
@@ -13,6 +14,7 @@ export class VehiculoImagenService {
     private readonly vehiculoImagenRepository: Repository<VehiculoImagen>,
     @InjectRepository(Vehiculo)
     private readonly vehiculoRepository: Repository<Vehiculo>,
+    private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
   private async getVehiculoOrFail(vehiculoId: string): Promise<Vehiculo> {
@@ -43,6 +45,36 @@ export class VehiculoImagenService {
       url: createDto.url,
       altText: createDto.altText,
       esPrincipal: createDto.esPrincipal ?? false,
+      vehiculo,
+    });
+
+    return this.vehiculoImagenRepository.save(imagen);
+  }
+
+  async uploadAndCreate(
+    vehiculoId: string,
+    file: Express.Multer.File,
+    payload: { altText?: string; esPrincipal?: boolean },
+  ) {
+    const vehiculo = await this.getVehiculoOrFail(vehiculoId);
+
+    if (payload.esPrincipal) {
+      await this.vehiculoImagenRepository.update(
+        { vehiculo: { id: vehiculoId } },
+        { esPrincipal: false },
+      );
+    }
+
+    const uploadResult = await this.supabaseStorageService.uploadVehiculoImagen(
+      file,
+      vehiculoId,
+    );
+
+    const imagen = this.vehiculoImagenRepository.create({
+      url: uploadResult.publicUrl,
+      storagePath: uploadResult.storagePath,
+      altText: payload.altText,
+      esPrincipal: payload.esPrincipal ?? false,
       vehiculo,
     });
 
@@ -117,6 +149,11 @@ export class VehiculoImagenService {
 
   async remove(id: string) {
     const imagen = await this.findOne(id);
+
+    if (imagen.storagePath) {
+      await this.supabaseStorageService.removeFile(imagen.storagePath);
+    }
+
     await this.vehiculoImagenRepository.remove(imagen);
     return { message: 'Imagen eliminada correctamente' };
   }
