@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
-import { UserModule } from 'src/user/user.module';
+import { AuthModule } from 'src/auth/auth.module';
 import { ClienteModule } from 'src/cliente/cliente.module';
 import { CategoriaModule } from 'src/categoria/categoria.module';
 import { VehiculoModule } from 'src/vehiculo/vehiculo.module';
@@ -38,7 +38,7 @@ import { AdminModule } from 'src/admin/admin.module';
         };
       },
     }),
-    UserModule,
+    AuthModule,
     ClienteModule,
     CategoriaModule,
     VehiculoModule,

@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { User } from '../../user/entities/user.entity';
+import { User } from 'src/auth/entities/user.entity';
 import { Reserva } from '../../reserva/entities/reserva.entity';
 
 @Entity({ name: 'clientes' })

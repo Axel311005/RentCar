@@ -14,7 +14,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { User } from '../../user/entities/user.entity';
+import { User } from 'src/auth/entities/user.entity';
 
 @Entity({ name: 'empleados' })
 export class Empleado {
