@@ -59,8 +59,12 @@ export class SeedService {
     await this.userRepository.upsert(usersToSeed, ['email']);
 
     const [clienteUser, empleadoUser] = await Promise.all([
-      this.userRepository.findOne({ where: { email: 'cliente.demo@rentcar.com' } }),
-      this.userRepository.findOne({ where: { email: 'empleado.demo@rentcar.com' } }),
+      this.userRepository.findOne({
+        where: { email: 'cliente.demo@rentcar.com' },
+      }),
+      this.userRepository.findOne({
+        where: { email: 'empleado.demo@rentcar.com' },
+      }),
     ]);
 
     if (!clienteUser || !empleadoUser) {

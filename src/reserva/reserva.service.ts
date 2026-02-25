@@ -55,7 +55,8 @@ export class ReservaService {
     const repo = repository ?? this.reservaRepository;
     const qb = repo
       .createQueryBuilder('r')
-      .where('r.vehiculo_id = :vehiculoId', { vehiculoId })
+      .innerJoin('r.vehiculo', 'vehiculo')
+      .where('vehiculo.id = :vehiculoId', { vehiculoId })
       .andWhere('r.estado IN (:...estados)', {
         estados: this.estadosBloqueantes,
       })
