@@ -53,7 +53,7 @@ export class DashboardService {
         this.vehiculoRepository.countBy({ estado: VehiculoEstado.DISPONIBLE }),
         this.vehiculoRepository.countBy({ estado: VehiculoEstado.RENTADO }),
         this.vehiculoRepository.countBy({
-          estado: VehiculoEstado.MANTENIMIENTO,
+          estado: VehiculoEstado.EN_REPARACION,
         }),
       ]);
 

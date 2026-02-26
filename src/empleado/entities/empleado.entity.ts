@@ -7,14 +7,15 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import {
-  IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 import { User } from 'src/auth/entities/user.entity';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 @Entity({ name: 'empleados' })
 export class Empleado {
@@ -49,9 +50,14 @@ export class Empleado {
   @MaxLength(80)
   cargo: string;
 
-  @Column({ type: 'boolean', default: true, name: 'activo' })
-  @IsBoolean()
-  activo: boolean;
+  @Column({
+    type: 'enum',
+    enum: EstadoGeneral,
+    default: EstadoGeneral.ACTIVO,
+    name: 'estado',
+  })
+  @IsEnum(EstadoGeneral)
+  estado: EstadoGeneral;
 
   @CreateDateColumn({ type: 'timestamp', name: 'fecha_ingreso' })
   fechaIngreso: Date;

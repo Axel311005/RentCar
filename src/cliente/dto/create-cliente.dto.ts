@@ -1,11 +1,15 @@
 import {
+  IsEnum,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 export class CreateClienteDto {
   @ApiProperty({
@@ -44,6 +48,16 @@ export class CreateClienteDto {
   @IsNotEmpty()
   @MaxLength(30)
   telefono: string;
+
+  @ApiPropertyOptional({
+    description: 'Estado del cliente',
+    enum: EstadoGeneral,
+    example: EstadoGeneral.ACTIVO,
+    default: EstadoGeneral.ACTIVO,
+  })
+  @IsOptional()
+  @IsEnum(EstadoGeneral)
+  estado?: EstadoGeneral;
 
   @ApiProperty({
     description: 'UUID del usuario asociado al cliente',

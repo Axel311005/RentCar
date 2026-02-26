@@ -2,29 +2,39 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
-import { Categoria } from 'src/categoria/entities/categoria.entity';
 import { Vehiculo } from 'src/vehiculo/entities/vehiculo.entity';
-import { VehiculoImagen } from 'src/vehiculo/entities/vehiculo-imagen.entity';
+import { ModeloImagen } from 'src/vehiculo/entities/vehiculo-imagen.entity';
 import { VehiculoEstado } from 'src/vehiculo/enums/vehiculo-estado.enum';
 import { EncryptionService } from 'src/auth/services/encryption.service';
 import { Cliente } from 'src/cliente/entities/cliente.entity';
 import { Empleado } from 'src/empleado/entities/empleado.entity';
+import { Modelo } from 'src/modelo/entities/modelo.entity';
+import { TemporadaPrecio } from 'src/temporada-precio/entities/temporada-precio.entity';
+import { ModeloPrecioTemporada } from 'src/modelo-precio-temporada/entities/modelo-precio-temporada.entity';
+import { Categoria } from 'src/categoria/entities/categoria.entity';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 @Injectable()
 export class SeedService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Categoria)
-    private readonly categoriaRepository: Repository<Categoria>,
     @InjectRepository(Cliente)
     private readonly clienteRepository: Repository<Cliente>,
     @InjectRepository(Empleado)
     private readonly empleadoRepository: Repository<Empleado>,
+    @InjectRepository(Categoria)
+    private readonly categoriaRepository: Repository<Categoria>,
+    @InjectRepository(Modelo)
+    private readonly modeloRepository: Repository<Modelo>,
+    @InjectRepository(TemporadaPrecio)
+    private readonly temporadaPrecioRepository: Repository<TemporadaPrecio>,
+    @InjectRepository(ModeloPrecioTemporada)
+    private readonly modeloPrecioTemporadaRepository: Repository<ModeloPrecioTemporada>,
     @InjectRepository(Vehiculo)
     private readonly vehiculoRepository: Repository<Vehiculo>,
-    @InjectRepository(VehiculoImagen)
-    private readonly vehiculoImagenRepository: Repository<VehiculoImagen>,
+    @InjectRepository(ModeloImagen)
+    private readonly modeloImagenRepository: Repository<ModeloImagen>,
     private readonly encryptionService: EncryptionService,
   ) {}
 
@@ -80,6 +90,7 @@ export class SeedService {
       clienteExistente.nombres = 'Cliente';
       clienteExistente.apellidos = 'Demo';
       clienteExistente.telefono = '+595981111111';
+      clienteExistente.estado = EstadoGeneral.ACTIVO;
       clienteExistente.user = clienteUser;
       await this.clienteRepository.save(clienteExistente);
     } else {
@@ -88,6 +99,7 @@ export class SeedService {
         apellidos: 'Demo',
         email: 'cliente.demo@rentcar.com',
         telefono: '+595981111111',
+        estado: EstadoGeneral.ACTIVO,
         user: clienteUser,
       });
       await this.clienteRepository.save(cliente);
@@ -103,7 +115,7 @@ export class SeedService {
       empleadoExistente.apellidos = 'Demo';
       empleadoExistente.telefono = '+595982222222';
       empleadoExistente.cargo = 'Supervisor';
-      empleadoExistente.activo = true;
+      empleadoExistente.estado = EstadoGeneral.ACTIVO;
       empleadoExistente.user = empleadoUser;
       await this.empleadoRepository.save(empleadoExistente);
     } else {
@@ -113,7 +125,7 @@ export class SeedService {
         email: 'empleado.demo@rentcar.com',
         telefono: '+595982222222',
         cargo: 'Supervisor',
-        activo: true,
+        estado: EstadoGeneral.ACTIVO,
         user: empleadoUser,
       });
       await this.empleadoRepository.save(empleado);
@@ -123,14 +135,17 @@ export class SeedService {
       {
         nombre: 'Económico',
         descripcion: 'Vehículos compactos con bajo consumo para uso diario.',
+        estado: EstadoGeneral.ACTIVO,
       },
       {
         nombre: 'SUV',
         descripcion: 'Vehículos utilitarios deportivos para viajes y familia.',
+        estado: EstadoGeneral.ACTIVO,
       },
       {
         nombre: 'Premium',
         descripcion: 'Vehículos de alta gama con mayor confort.',
+        estado: EstadoGeneral.ACTIVO,
       },
     ];
 
@@ -141,6 +156,7 @@ export class SeedService {
 
       if (existente) {
         existente.descripcion = categoriaData.descripcion;
+        existente.estado = categoriaData.estado;
         await this.categoriaRepository.save(existente);
         continue;
       }
@@ -151,135 +167,296 @@ export class SeedService {
 
     const categorias = await this.categoriaRepository.find();
     const categoriaByNombre = new Map(
-      categorias.map((cat) => [cat.nombre, cat]),
+      categorias.map((categoria) => [categoria.nombre, categoria]),
     );
 
-    const vehiculosToSeed = [
+    const modelosToSeed = [
       {
         marca: 'Toyota',
-        modelo: 'Yaris',
+        nombre: 'Yaris',
         anio: 2022,
-        placa: 'RNT-1001',
-        precioPorDia: 45,
-        estado: VehiculoEstado.DISPONIBLE,
-        activo: true,
+        tipoCombustible: 'gasolina',
+        capacidadPasajeros: 5,
+        precioBaseDiario: 45,
+        estado: EstadoGeneral.ACTIVO,
         categoriaNombre: 'Económico',
       },
       {
         marca: 'Hyundai',
-        modelo: 'Creta',
+        nombre: 'Creta',
         anio: 2023,
-        placa: 'RNT-2001',
-        precioPorDia: 75,
-        estado: VehiculoEstado.DISPONIBLE,
-        activo: true,
+        tipoCombustible: 'gasolina',
+        capacidadPasajeros: 5,
+        precioBaseDiario: 75,
+        estado: EstadoGeneral.ACTIVO,
         categoriaNombre: 'SUV',
       },
       {
         marca: 'BMW',
-        modelo: 'Serie 3',
+        nombre: 'Serie 3',
         anio: 2021,
-        placa: 'RNT-3001',
-        precioPorDia: 120,
-        estado: VehiculoEstado.MANTENIMIENTO,
-        activo: true,
+        tipoCombustible: 'gasolina',
+        capacidadPasajeros: 5,
+        precioBaseDiario: 120,
+        estado: EstadoGeneral.ACTIVO,
         categoriaNombre: 'Premium',
       },
     ];
 
-    for (const vehiculoData of vehiculosToSeed) {
-      const categoria = categoriaByNombre.get(vehiculoData.categoriaNombre);
+    for (const modeloData of modelosToSeed) {
+      const categoria = categoriaByNombre.get(modeloData.categoriaNombre);
       if (!categoria) {
         throw new Error(
-          `No se encontró la categoría ${vehiculoData.categoriaNombre} para sembrar vehículos.`,
+          `No se encontró la categoría ${modeloData.categoriaNombre} para sembrar modelos.`,
+        );
+      }
+
+      const existente = await this.modeloRepository.findOne({
+        where: {
+          marca: modeloData.marca,
+          nombre: modeloData.nombre,
+          anio: modeloData.anio,
+        },
+        relations: { categoria: true },
+      });
+
+      if (existente) {
+        existente.marca = modeloData.marca;
+        existente.nombre = modeloData.nombre;
+        existente.anio = modeloData.anio;
+        existente.tipoCombustible = modeloData.tipoCombustible;
+        existente.capacidadPasajeros = modeloData.capacidadPasajeros;
+        existente.precioBaseDiario = modeloData.precioBaseDiario;
+        existente.estado = modeloData.estado;
+        existente.categoria = categoria;
+        await this.modeloRepository.save(existente);
+        continue;
+      }
+
+      const modelo = this.modeloRepository.create({
+        marca: modeloData.marca,
+        nombre: modeloData.nombre,
+        anio: modeloData.anio,
+        tipoCombustible: modeloData.tipoCombustible,
+        capacidadPasajeros: modeloData.capacidadPasajeros,
+        precioBaseDiario: modeloData.precioBaseDiario,
+        estado: modeloData.estado,
+        categoria,
+      });
+      await this.modeloRepository.save(modelo);
+    }
+
+    const modelos = await this.modeloRepository.find();
+    const modeloByKey = new Map(
+      modelos.map((modelo) => [
+        `${modelo.marca}|${modelo.nombre}|${modelo.anio}`,
+        modelo,
+      ]),
+    );
+
+    const vehiculosToSeed = [
+      {
+        placa: 'RNT-1001',
+        color: 'Gris',
+        estado: VehiculoEstado.DISPONIBLE,
+        kilometraje: 22350,
+        modeloKey: 'Toyota|Yaris|2022',
+      },
+      {
+        placa: 'RNT-2001',
+        color: 'Blanco',
+        estado: VehiculoEstado.DISPONIBLE,
+        kilometraje: 17400,
+        modeloKey: 'Hyundai|Creta|2023',
+      },
+      {
+        placa: 'RNT-3001',
+        color: 'Negro',
+        estado: VehiculoEstado.EN_REPARACION,
+        kilometraje: 48100,
+        modeloKey: 'BMW|Serie 3|2021',
+      },
+    ];
+
+    for (const vehiculoData of vehiculosToSeed) {
+      const modelo = modeloByKey.get(vehiculoData.modeloKey);
+      if (!modelo) {
+        throw new Error(
+          `No se encontró el modelo ${vehiculoData.modeloKey} para sembrar vehículos.`,
         );
       }
 
       const existente = await this.vehiculoRepository.findOne({
         where: { placa: vehiculoData.placa },
-        relations: { categoria: true },
+        relations: { modelo: true },
       });
 
       if (existente) {
-        existente.marca = vehiculoData.marca;
-        existente.modelo = vehiculoData.modelo;
-        existente.anio = vehiculoData.anio;
-        existente.precioPorDia = vehiculoData.precioPorDia;
+        existente.color = vehiculoData.color;
         existente.estado = vehiculoData.estado;
-        existente.activo = vehiculoData.activo;
-        existente.categoria = categoria;
+        existente.kilometraje = vehiculoData.kilometraje;
+        existente.modelo = modelo;
         await this.vehiculoRepository.save(existente);
         continue;
       }
 
       const vehiculo = this.vehiculoRepository.create({
-        marca: vehiculoData.marca,
-        modelo: vehiculoData.modelo,
-        anio: vehiculoData.anio,
         placa: vehiculoData.placa,
-        precioPorDia: vehiculoData.precioPorDia,
+        color: vehiculoData.color,
         estado: vehiculoData.estado,
-        activo: vehiculoData.activo,
-        categoria,
+        kilometraje: vehiculoData.kilometraje,
+        modelo,
       });
 
       await this.vehiculoRepository.save(vehiculo);
     }
 
-    const vehiculos = await this.vehiculoRepository.find();
-    const vehiculoByPlaca = new Map(
-      vehiculos.map((vehiculo) => [vehiculo.placa, vehiculo]),
-    );
-
     const imagenesToSeed = [
       {
-        placa: 'RNT-1001',
+        modeloKey: 'Toyota|Yaris|2022',
         url: 'https://images.unsplash.com/photo-1549924231-f129b911e442',
-        altText: 'Toyota Yaris gris estacionado',
-        esPrincipal: true,
       },
       {
-        placa: 'RNT-2001',
+        modeloKey: 'Hyundai|Creta|2023',
         url: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b',
-        altText: 'Hyundai Creta blanca en carretera',
-        esPrincipal: true,
       },
       {
-        placa: 'RNT-3001',
+        modeloKey: 'BMW|Serie 3|2021',
         url: 'https://images.unsplash.com/photo-1555215695-3004980ad54e',
-        altText: 'BMW Serie 3 negro en ciudad',
-        esPrincipal: true,
       },
     ];
 
     for (const imagenData of imagenesToSeed) {
-      const vehiculo = vehiculoByPlaca.get(imagenData.placa);
-      if (!vehiculo) {
+      const modelo = modeloByKey.get(imagenData.modeloKey);
+      if (!modelo) {
         throw new Error(
-          `No se encontró el vehículo con placa ${imagenData.placa} para la imagen seed.`,
+          `No se encontró el modelo ${imagenData.modeloKey} para la imagen seed.`,
         );
       }
 
-      const existente = await this.vehiculoImagenRepository.findOne({
-        where: { url: imagenData.url, vehiculo: { id: vehiculo.id } },
-        relations: { vehiculo: true },
+      const existente = await this.modeloImagenRepository.findOne({
+        where: { url: imagenData.url, modelo: { id: modelo.id } },
+        relations: { modelo: true },
+      });
+
+      if (!existente) {
+        const imagen = this.modeloImagenRepository.create({
+          url: imagenData.url,
+          modelo,
+        });
+
+        await this.modeloImagenRepository.save(imagen);
+      }
+    }
+
+    const temporadasToSeed = [
+      {
+        descripcion: 'Temporada alta verano',
+        fechaInicio: '2026-12-01',
+        fechaFin: '2027-02-28',
+      },
+      {
+        descripcion: 'Semana Santa',
+        fechaInicio: '2027-03-24',
+        fechaFin: '2027-04-02',
+      },
+      {
+        descripcion: 'Vacaciones de invierno',
+        fechaInicio: '2027-07-01',
+        fechaFin: '2027-07-31',
+      },
+    ];
+
+    for (const temporadaData of temporadasToSeed) {
+      const existente = await this.temporadaPrecioRepository.findOne({
+        where: {
+          descripcion: temporadaData.descripcion,
+          fechaInicio: temporadaData.fechaInicio,
+          fechaFin: temporadaData.fechaFin,
+        },
       });
 
       if (existente) {
-        existente.altText = imagenData.altText;
-        existente.esPrincipal = imagenData.esPrincipal;
-        await this.vehiculoImagenRepository.save(existente);
+        Object.assign(existente, temporadaData);
+        await this.temporadaPrecioRepository.save(existente);
         continue;
       }
 
-      const imagen = this.vehiculoImagenRepository.create({
-        url: imagenData.url,
-        altText: imagenData.altText,
-        esPrincipal: imagenData.esPrincipal,
-        vehiculo,
+      const temporada = this.temporadaPrecioRepository.create(temporadaData);
+      await this.temporadaPrecioRepository.save(temporada);
+    }
+
+    const temporadas = await this.temporadaPrecioRepository.find();
+    const temporadaByDescripcion = new Map(
+      temporadas.map((temporada) => [temporada.descripcion, temporada]),
+    );
+
+    const preciosTemporadaToSeed = [
+      {
+        modeloKey: 'Toyota|Yaris|2022',
+        temporadaDescripcion: 'Temporada alta verano',
+        precioDiario: 55,
+      },
+      {
+        modeloKey: 'Hyundai|Creta|2023',
+        temporadaDescripcion: 'Temporada alta verano',
+        precioDiario: 89,
+      },
+      {
+        modeloKey: 'BMW|Serie 3|2021',
+        temporadaDescripcion: 'Temporada alta verano',
+        precioDiario: 140,
+      },
+      {
+        modeloKey: 'Toyota|Yaris|2022',
+        temporadaDescripcion: 'Semana Santa',
+        precioDiario: 52,
+      },
+      {
+        modeloKey: 'Hyundai|Creta|2023',
+        temporadaDescripcion: 'Vacaciones de invierno',
+        precioDiario: 84,
+      },
+    ];
+
+    for (const precioData of preciosTemporadaToSeed) {
+      const modelo = modeloByKey.get(precioData.modeloKey);
+      if (!modelo) {
+        throw new Error(
+          `No se encontró el modelo ${precioData.modeloKey} para el precio de temporada.`,
+        );
+      }
+
+      const temporada = temporadaByDescripcion.get(
+        precioData.temporadaDescripcion,
+      );
+      if (!temporada) {
+        throw new Error(
+          `No se encontró la temporada ${precioData.temporadaDescripcion} para sembrar precios por temporada.`,
+        );
+      }
+
+      const existente = await this.modeloPrecioTemporadaRepository.findOne({
+        where: {
+          modelo: { id: modelo.id },
+          temporada: { id: temporada.id },
+        },
+        relations: { modelo: true, temporada: true },
       });
 
-      await this.vehiculoImagenRepository.save(imagen);
+      if (existente) {
+        existente.precioDiario = precioData.precioDiario;
+        await this.modeloPrecioTemporadaRepository.save(existente);
+        continue;
+      }
+
+      const precioTemporada = this.modeloPrecioTemporadaRepository.create({
+        modelo,
+        temporada,
+        precioDiario: precioData.precioDiario,
+      });
+
+      await this.modeloPrecioTemporadaRepository.save(precioTemporada);
     }
 
     return {

@@ -1,46 +1,28 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import {
-  IsBoolean,
   IsEnum,
-  IsInt,
   IsNotEmpty,
-  IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
-  Min,
 } from 'class-validator';
-import { Categoria } from '../../categoria/entities/categoria.entity';
+import { Modelo } from '../../modelo/entities/modelo.entity';
 import { Reserva } from '../../reserva/entities/reserva.entity';
 import { VehiculoEstado } from '../enums/vehiculo-estado.enum';
-import { VehiculoImagen } from './vehiculo-imagen.entity';
 
 @Entity({ name: 'vehiculos' })
 export class Vehiculo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'varchar', length: 80, name: 'marca' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(80)
-  marca: string;
-
-  @Column({ type: 'varchar', length: 80, name: 'modelo' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(80)
-  modelo: string;
-
-  @Column({ type: 'int', name: 'anio' })
-  @IsInt()
-  @Min(1900)
-  anio: number;
 
   @Column({ type: 'varchar', length: 20, unique: true, name: 'placa' })
   @IsString()
@@ -48,10 +30,11 @@ export class Vehiculo {
   @MaxLength(20)
   placa: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'precio_por_dia' })
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  precioPorDia: number;
+  @Column({ type: 'varchar', length: 40, nullable: true, name: 'color' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  color?: string;
 
   @Column({
     type: 'enum',
@@ -62,19 +45,28 @@ export class Vehiculo {
   @IsEnum(VehiculoEstado)
   estado: VehiculoEstado;
 
-  @Column({ type: 'boolean', default: true, name: 'activo' })
-  @IsBoolean()
-  activo: boolean;
-
-  @ManyToOne(() => Categoria, (categoria) => categoria.vehiculos, {
-    nullable: false,
-    onDelete: 'RESTRICT',
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    name: 'kilometraje',
   })
-  categoria: Categoria;
+  kilometraje?: number;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
+  updatedAt: Date;
+
+  @ManyToOne(() => Modelo, (modelo) => modelo.vehiculos, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'modelo_id' })
+  modelo: Modelo;
 
   @OneToMany(() => Reserva, (reserva) => reserva.vehiculo)
   reservas: Reserva[];
-
-  @OneToMany(() => VehiculoImagen, (imagen) => imagen.vehiculo)
-  imagenes: VehiculoImagen[];
 }

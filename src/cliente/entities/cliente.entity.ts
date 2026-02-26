@@ -7,9 +7,16 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { User } from 'src/auth/entities/user.entity';
 import { Reserva } from '../../reserva/entities/reserva.entity';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 @Entity({ name: 'clientes' })
 export class Cliente {
@@ -37,6 +44,15 @@ export class Cliente {
   @IsNotEmpty()
   @MaxLength(30)
   telefono: string;
+
+  @Column({
+    type: 'enum',
+    enum: EstadoGeneral,
+    default: EstadoGeneral.ACTIVO,
+    name: 'estado',
+  })
+  @IsEnum(EstadoGeneral)
+  estado: EstadoGeneral;
 
   @CreateDateColumn({ type: 'timestamp', name: 'fecha_registro' })
   fechaRegistro: Date;

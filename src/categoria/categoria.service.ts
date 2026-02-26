@@ -18,13 +18,12 @@ export class CategoriaService {
   }
 
   findAll() {
-    return this.categoriaRepository.find({ relations: { vehiculos: true } });
+    return this.categoriaRepository.find();
   }
 
   async findOne(id: string) {
     const categoria = await this.categoriaRepository.findOne({
       where: { id },
-      relations: { vehiculos: true },
     });
     if (!categoria) {
       throw new NotFoundException(`Categoria con id ${id} no encontrada`);

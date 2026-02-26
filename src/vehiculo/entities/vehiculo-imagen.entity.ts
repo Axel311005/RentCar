@@ -1,55 +1,31 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
-import { Vehiculo } from './vehiculo.entity';
+import { IsNotEmpty, IsUrl } from 'class-validator';
+import { Modelo } from '../../modelo/entities/modelo.entity';
 
-@Entity({ name: 'vehiculo_imagenes' })
-export class VehiculoImagen {
+@Entity({ name: 'modelo_imagenes' })
+export class ModeloImagen {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 500, name: 'url' })
+  @Column({ type: 'text', name: 'url' })
   @IsUrl()
   @IsNotEmpty()
   url: string;
 
-  @Column({ type: 'varchar', length: 150, nullable: true, name: 'alt_text' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  altText?: string;
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
 
-  @Column({
-    type: 'varchar',
-    length: 500,
-    nullable: true,
-    name: 'storage_path',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  storagePath?: string;
-
-  @Column({ type: 'boolean', default: false, name: 'es_principal' })
-  @IsBoolean()
-  esPrincipal: boolean;
-
-  @ManyToOne(() => Vehiculo, (vehiculo) => vehiculo.imagenes, {
+  @ManyToOne(() => Modelo, (modelo) => modelo.imagenes, {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'vehiculo_id' })
-  vehiculo: Vehiculo;
+  @JoinColumn({ name: 'modelo_id' })
+  modelo: Modelo;
 }

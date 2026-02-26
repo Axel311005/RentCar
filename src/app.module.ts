@@ -12,6 +12,9 @@ import { PagoModule } from 'src/pago/pago.module';
 import { VehiculoImagenModule } from 'src/vehiculo-imagen/vehiculo-imagen.module';
 import { EmpleadoModule } from 'src/empleado/empleado.module';
 import { AdminModule } from 'src/admin/admin.module';
+import { ModeloModule } from 'src/modelo/modelo.module';
+import { TemporadaPrecioModule } from 'src/temporada-precio/temporada-precio.module';
+import { ModeloPrecioTemporadaModule } from 'src/modelo-precio-temporada/modelo-precio-temporada.module';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { AdminModule } from 'src/admin/admin.module';
     CategoriaModule,
     VehiculoModule,
     VehiculoImagenModule,
+    ModeloModule,
+    TemporadaPrecioModule,
+    ModeloPrecioTemporadaModule,
     EmpleadoModule,
     AdminModule,
     ReservaModule,

@@ -9,6 +9,7 @@ import { Empleado } from './entities/empleado.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { CreateEmpleadoDto } from './dto/create-empleado.dto';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 @Injectable()
 export class EmpleadoService {
@@ -43,7 +44,7 @@ export class EmpleadoService {
 
     const empleado = this.empleadoRepository.create({
       ...empleadoData,
-      activo: empleadoData.activo ?? true,
+      estado: empleadoData.estado ?? EstadoGeneral.ACTIVO,
       user,
     });
     return this.empleadoRepository.save(empleado);

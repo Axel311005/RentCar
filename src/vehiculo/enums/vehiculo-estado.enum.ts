@@ -1,5 +1,1 @@
-export enum VehiculoEstado {
-  DISPONIBLE = 'Disponible',
-  RENTADO = 'Rentado',
-  MANTENIMIENTO = 'Mantenimiento',
-}
+export { VehiculoEstado } from 'src/enum/vehiculo-estado.enum';

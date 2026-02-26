@@ -1,6 +1,13 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-import { Vehiculo } from '../../vehiculo/entities/vehiculo.entity';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { Modelo } from '../../modelo/entities/modelo.entity';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 @Entity({ name: 'categorias' })
 export class Categoria {
@@ -18,6 +25,15 @@ export class Categoria {
   @IsString()
   descripcion?: string;
 
-  @OneToMany(() => Vehiculo, (vehiculo) => vehiculo.categoria)
-  vehiculos: Vehiculo[];
+  @Column({
+    type: 'enum',
+    enum: EstadoGeneral,
+    default: EstadoGeneral.ACTIVO,
+    name: 'estado',
+  })
+  @IsEnum(EstadoGeneral)
+  estado: EstadoGeneral;
+
+  @OneToMany(() => Modelo, (modelo) => modelo.categoria)
+  modelos: Modelo[];
 }

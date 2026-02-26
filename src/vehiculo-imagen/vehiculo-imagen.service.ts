@@ -1,105 +1,60 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { VehiculoImagen } from '../vehiculo/entities/vehiculo-imagen.entity';
-import { Vehiculo } from '../vehiculo/entities/vehiculo.entity';
+import { ModeloImagen } from '../vehiculo/entities/vehiculo-imagen.entity';
+import { Modelo } from '../modelo/entities/modelo.entity';
 import { CreateVehiculoImagenDto } from './dto/create-vehiculo-imagen.dto';
 import { UpdateVehiculoImagenDto } from './dto/update-vehiculo-imagen.dto';
-import { SupabaseStorageService } from '../storage/supabase-storage.service';
 
 @Injectable()
 export class VehiculoImagenService {
   constructor(
-    @InjectRepository(VehiculoImagen)
-    private readonly vehiculoImagenRepository: Repository<VehiculoImagen>,
-    @InjectRepository(Vehiculo)
-    private readonly vehiculoRepository: Repository<Vehiculo>,
-    private readonly supabaseStorageService: SupabaseStorageService,
+    @InjectRepository(ModeloImagen)
+    private readonly modeloImagenRepository: Repository<ModeloImagen>,
+    @InjectRepository(Modelo)
+    private readonly modeloRepository: Repository<Modelo>,
   ) {}
 
-  private async getVehiculoOrFail(vehiculoId: string): Promise<Vehiculo> {
-    const vehiculo = await this.vehiculoRepository.findOne({
-      where: { id: vehiculoId },
+  private async getModeloOrFail(modeloId: string): Promise<Modelo> {
+    const modelo = await this.modeloRepository.findOne({
+      where: { id: modeloId },
     });
 
-    if (!vehiculo) {
-      throw new NotFoundException(
-        `Vehículo con id ${vehiculoId} no encontrado`,
-      );
+    if (!modelo) {
+      throw new NotFoundException(`Modelo con id ${modeloId} no encontrado`);
     }
 
-    return vehiculo;
+    return modelo;
   }
 
   async create(createDto: CreateVehiculoImagenDto) {
-    const vehiculo = await this.getVehiculoOrFail(createDto.vehiculoId);
+    const modelo = await this.getModeloOrFail(createDto.modeloId);
 
-    if (createDto.esPrincipal) {
-      await this.vehiculoImagenRepository.update(
-        { vehiculo: { id: createDto.vehiculoId } },
-        { esPrincipal: false },
-      );
-    }
-
-    const imagen = this.vehiculoImagenRepository.create({
+    const imagen = this.modeloImagenRepository.create({
       url: createDto.url,
-      altText: createDto.altText,
-      esPrincipal: createDto.esPrincipal ?? false,
-      vehiculo,
+      modelo,
     });
 
-    return this.vehiculoImagenRepository.save(imagen);
-  }
-
-  async uploadAndCreate(
-    vehiculoId: string,
-    file: Express.Multer.File,
-    payload: { altText?: string; esPrincipal?: boolean },
-  ) {
-    const vehiculo = await this.getVehiculoOrFail(vehiculoId);
-
-    if (payload.esPrincipal) {
-      await this.vehiculoImagenRepository.update(
-        { vehiculo: { id: vehiculoId } },
-        { esPrincipal: false },
-      );
-    }
-
-    const uploadResult = await this.supabaseStorageService.uploadVehiculoImagen(
-      file,
-      vehiculoId,
-    );
-
-    const imagen = this.vehiculoImagenRepository.create({
-      url: uploadResult.publicUrl,
-      storagePath: uploadResult.storagePath,
-      altText: payload.altText,
-      esPrincipal: payload.esPrincipal ?? false,
-      vehiculo,
-    });
-
-    return this.vehiculoImagenRepository.save(imagen);
+    return this.modeloImagenRepository.save(imagen);
   }
 
   findAll() {
-    return this.vehiculoImagenRepository.find({
-      relations: { vehiculo: true },
-      order: { esPrincipal: 'DESC' },
+    return this.modeloImagenRepository.find({
+      relations: { modelo: true },
     });
   }
 
-  findByVehiculo(vehiculoId: string) {
-    return this.vehiculoImagenRepository.find({
-      where: { vehiculo: { id: vehiculoId } },
-      relations: { vehiculo: true },
-      order: { esPrincipal: 'DESC' },
+  findByModelo(modeloId: string) {
+    return this.modeloImagenRepository.find({
+      where: { modelo: { id: modeloId } },
+      relations: { modelo: true },
     });
   }
 
   async findOne(id: string) {
-    const imagen = await this.vehiculoImagenRepository.findOne({
+    const imagen = await this.modeloImagenRepository.findOne({
       where: { id },
-      relations: { vehiculo: true },
+      relations: { modelo: true },
     });
 
     if (!imagen) {
@@ -112,49 +67,19 @@ export class VehiculoImagenService {
   async update(id: string, updateDto: UpdateVehiculoImagenDto) {
     const imagen = await this.findOne(id);
 
-    let vehiculoIdActual = imagen.vehiculo.id;
-    if (updateDto.vehiculoId && updateDto.vehiculoId !== vehiculoIdActual) {
-      const nuevoVehiculo = await this.getVehiculoOrFail(updateDto.vehiculoId);
-      imagen.vehiculo = nuevoVehiculo;
-      vehiculoIdActual = nuevoVehiculo.id;
-    }
-
-    if (updateDto.esPrincipal) {
-      await this.vehiculoImagenRepository.update(
-        { vehiculo: { id: vehiculoIdActual } },
-        { esPrincipal: false },
-      );
+    if (updateDto.modeloId && updateDto.modeloId !== imagen.modelo.id) {
+      imagen.modelo = await this.getModeloOrFail(updateDto.modeloId);
     }
 
     if (updateDto.url !== undefined) imagen.url = updateDto.url;
-    if (updateDto.altText !== undefined) imagen.altText = updateDto.altText;
-    if (updateDto.esPrincipal !== undefined) {
-      imagen.esPrincipal = updateDto.esPrincipal;
-    }
 
-    return this.vehiculoImagenRepository.save(imagen);
-  }
-
-  async setPrincipal(id: string) {
-    const imagen = await this.findOne(id);
-
-    await this.vehiculoImagenRepository.update(
-      { vehiculo: { id: imagen.vehiculo.id } },
-      { esPrincipal: false },
-    );
-
-    imagen.esPrincipal = true;
-    return this.vehiculoImagenRepository.save(imagen);
+    return this.modeloImagenRepository.save(imagen);
   }
 
   async remove(id: string) {
     const imagen = await this.findOne(id);
 
-    if (imagen.storagePath) {
-      await this.supabaseStorageService.removeFile(imagen.storagePath);
-    }
-
-    await this.vehiculoImagenRepository.remove(imagen);
+    await this.modeloImagenRepository.remove(imagen);
     return { message: 'Imagen eliminada correctamente' };
   }
 }

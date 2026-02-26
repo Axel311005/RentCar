@@ -3,20 +3,13 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
-  ParseBoolPipe,
-  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Patch,
   Post,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
-  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -33,54 +26,13 @@ import { UpdateVehiculoImagenDto } from './dto/update-vehiculo-imagen.dto';
 export class VehiculoImagenController {
   constructor(private readonly vehiculoImagenService: VehiculoImagenService) {}
 
-  @ApiOperation({ summary: 'Crear imagen para un vehículo existente' })
+  @ApiOperation({ summary: 'Crear imagen para un modelo existente' })
   @ApiBody({ type: CreateVehiculoImagenDto })
   @ApiCreatedResponse({ description: 'Imagen creada correctamente.' })
-  @ApiNotFoundResponse({ description: 'Vehículo no encontrado.' })
+  @ApiNotFoundResponse({ description: 'Modelo no encontrado.' })
   @Post()
   create(@Body() createDto: CreateVehiculoImagenDto) {
     return this.vehiculoImagenService.create(createDto);
-  }
-
-  @ApiOperation({ summary: 'Subir imagen al bucket y asociarla a un vehículo' })
-  @ApiParam({
-    name: 'vehiculoId',
-    format: 'uuid',
-    description: 'UUID del vehículo',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: { type: 'string', format: 'binary' },
-        altText: { type: 'string' },
-        esPrincipal: { type: 'boolean' },
-      },
-      required: ['file'],
-    },
-  })
-  @ApiCreatedResponse({ description: 'Imagen subida y creada correctamente.' })
-  @ApiNotFoundResponse({ description: 'Vehículo no encontrado.' })
-  @Post('upload/:vehiculoId')
-  @UseInterceptors(FileInterceptor('file'))
-  upload(
-    @Param('vehiculoId', new ParseUUIDPipe()) vehiculoId: string,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({ fileType: /(jpg|jpeg|png|webp)$/i })
-        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
-        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
-    )
-    file: Express.Multer.File,
-    @Body('altText') altText?: string,
-    @Body('esPrincipal', new ParseBoolPipe({ optional: true }))
-    esPrincipal?: boolean,
-  ) {
-    return this.vehiculoImagenService.uploadAndCreate(vehiculoId, file, {
-      altText,
-      esPrincipal,
-    });
   }
 
   @ApiOperation({ summary: 'Listar todas las imágenes' })
@@ -90,18 +42,18 @@ export class VehiculoImagenController {
     return this.vehiculoImagenService.findAll();
   }
 
-  @ApiOperation({ summary: 'Listar imágenes por vehículo' })
+  @ApiOperation({ summary: 'Listar imágenes por modelo' })
   @ApiParam({
-    name: 'vehiculoId',
+    name: 'modeloId',
     format: 'uuid',
-    description: 'UUID del vehículo',
+    description: 'UUID del modelo',
   })
   @ApiOkResponse({
-    description: 'Imágenes del vehículo obtenidas correctamente.',
+    description: 'Imágenes del modelo obtenidas correctamente.',
   })
-  @Get('vehiculo/:vehiculoId')
-  findByVehiculo(@Param('vehiculoId', new ParseUUIDPipe()) vehiculoId: string) {
-    return this.vehiculoImagenService.findByVehiculo(vehiculoId);
+  @Get('modelo/:modeloId')
+  findByModelo(@Param('modeloId', new ParseUUIDPipe()) modeloId: string) {
+    return this.vehiculoImagenService.findByModelo(modeloId);
   }
 
   @ApiOperation({ summary: 'Obtener una imagen por id' })
@@ -117,22 +69,13 @@ export class VehiculoImagenController {
   @ApiParam({ name: 'id', format: 'uuid', description: 'UUID de la imagen' })
   @ApiBody({ type: UpdateVehiculoImagenDto })
   @ApiOkResponse({ description: 'Imagen actualizada correctamente.' })
-  @ApiNotFoundResponse({ description: 'Imagen o vehículo no encontrado.' })
+  @ApiNotFoundResponse({ description: 'Imagen o modelo no encontrado.' })
   @Patch(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateDto: UpdateVehiculoImagenDto,
   ) {
     return this.vehiculoImagenService.update(id, updateDto);
-  }
-
-  @ApiOperation({ summary: 'Marcar imagen como principal' })
-  @ApiParam({ name: 'id', format: 'uuid', description: 'UUID de la imagen' })
-  @ApiOkResponse({ description: 'Imagen principal actualizada correctamente.' })
-  @ApiNotFoundResponse({ description: 'Imagen no encontrada.' })
-  @Patch(':id/principal')
-  setPrincipal(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.vehiculoImagenService.setPrincipal(id);
   }
 
   @ApiOperation({ summary: 'Eliminar una imagen por id' })

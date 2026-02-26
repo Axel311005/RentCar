@@ -1,13 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
 } from 'class-validator';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 export class CreateEmpleadoDto {
   @ApiProperty({ description: 'Nombres del empleado', example: 'Ana María' })
@@ -46,12 +47,13 @@ export class CreateEmpleadoDto {
 
   @ApiPropertyOptional({
     description: 'Estado del empleado',
-    example: true,
-    default: true,
+    enum: EstadoGeneral,
+    example: EstadoGeneral.ACTIVO,
+    default: EstadoGeneral.ACTIVO,
   })
   @IsOptional()
-  @IsBoolean()
-  activo?: boolean;
+  @IsEnum(EstadoGeneral)
+  estado?: EstadoGeneral;
 
   @ApiProperty({
     description: 'UUID del usuario asociado al empleado',

@@ -1,5 +1,12 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { EstadoGeneral } from 'src/enum/estado-general.enum';
 
 export class CreateCategoriaDto {
   @ApiProperty({
@@ -19,4 +26,14 @@ export class CreateCategoriaDto {
   @IsOptional()
   @IsString()
   descripcion?: string;
+
+  @ApiPropertyOptional({
+    description: 'Estado de la categoría',
+    enum: EstadoGeneral,
+    example: EstadoGeneral.ACTIVO,
+    default: EstadoGeneral.ACTIVO,
+  })
+  @IsOptional()
+  @IsEnum(EstadoGeneral)
+  estado?: EstadoGeneral;
 }

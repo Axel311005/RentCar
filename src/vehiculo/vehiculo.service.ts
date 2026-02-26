@@ -4,46 +4,44 @@ import { Repository } from 'typeorm';
 import { CreateVehiculoDto } from './dto/create-vehiculo.dto';
 import { UpdateVehiculoDto } from './dto/update-vehiculo.dto';
 import { Vehiculo } from './entities/vehiculo.entity';
-import { Categoria } from '../categoria/entities/categoria.entity';
+import { Modelo } from '../modelo/entities/modelo.entity';
 
 @Injectable()
 export class VehiculoService {
   constructor(
     @InjectRepository(Vehiculo)
     private readonly vehiculoRepository: Repository<Vehiculo>,
-    @InjectRepository(Categoria)
-    private readonly categoriaRepository: Repository<Categoria>,
+    @InjectRepository(Modelo)
+    private readonly modeloRepository: Repository<Modelo>,
   ) {}
 
   async create(createVehiculoDto: CreateVehiculoDto) {
-    const { categoriaId, ...vehiculoData } = createVehiculoDto;
-    const categoria = await this.categoriaRepository.findOne({
-      where: { id: categoriaId },
+    const { modeloId, ...vehiculoData } = createVehiculoDto;
+    const modelo = await this.modeloRepository.findOne({
+      where: { id: modeloId },
     });
 
-    if (!categoria) {
-      throw new NotFoundException(
-        `Categoria con id ${categoriaId} no encontrada`,
-      );
+    if (!modelo) {
+      throw new NotFoundException(`Modelo con id ${modeloId} no encontrado`);
     }
 
     const vehiculo = this.vehiculoRepository.create({
       ...vehiculoData,
-      categoria,
+      modelo,
     });
     return this.vehiculoRepository.save(vehiculo);
   }
 
   findAll() {
     return this.vehiculoRepository.find({
-      relations: { categoria: true, reservas: true, imagenes: true },
+      relations: { modelo: true, reservas: true },
     });
   }
 
   async findOne(id: string) {
     const vehiculo = await this.vehiculoRepository.findOne({
       where: { id },
-      relations: { categoria: true, reservas: true, imagenes: true },
+      relations: { modelo: true, reservas: true },
     });
     if (!vehiculo) {
       throw new NotFoundException(`Vehiculo con id ${id} no encontrado`);
@@ -52,21 +50,19 @@ export class VehiculoService {
   }
 
   async update(id: string, updateVehiculoDto: UpdateVehiculoDto) {
-    const { categoriaId, ...vehiculoData } = updateVehiculoDto;
+    const { modeloId, ...vehiculoData } = updateVehiculoDto;
     const vehiculo = await this.findOne(id);
 
-    if (categoriaId) {
-      const categoria = await this.categoriaRepository.findOne({
-        where: { id: categoriaId },
+    if (modeloId) {
+      const modelo = await this.modeloRepository.findOne({
+        where: { id: modeloId },
       });
 
-      if (!categoria) {
-        throw new NotFoundException(
-          `Categoria con id ${categoriaId} no encontrada`,
-        );
+      if (!modelo) {
+        throw new NotFoundException(`Modelo con id ${modeloId} no encontrado`);
       }
 
-      vehiculo.categoria = categoria;
+      vehiculo.modelo = modelo;
     }
 
     Object.assign(vehiculo, vehiculoData);
