@@ -7,9 +7,13 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -21,18 +25,50 @@ import { VehiculoImagenService } from './vehiculo-imagen.service';
 import { CreateVehiculoImagenDto } from './dto/create-vehiculo-imagen.dto';
 import { UpdateVehiculoImagenDto } from './dto/update-vehiculo-imagen.dto';
 
-@ApiTags('Vehiculo-Imagenes')
-@Controller('vehiculo-imagenes')
+@ApiTags('Modelos-Imagenes')
+@Controller('modelos-imagenes')
 export class VehiculoImagenController {
   constructor(private readonly vehiculoImagenService: VehiculoImagenService) {}
 
   @ApiOperation({ summary: 'Crear imagen para un modelo existente' })
-  @ApiBody({ type: CreateVehiculoImagenDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['modeloId'],
+      properties: {
+        modeloId: {
+          type: 'string',
+          format: 'uuid',
+          description: 'UUID del modelo',
+        },
+        url: {
+          type: 'string',
+          format: 'uri',
+          nullable: true,
+          description: 'URL manual opcional, se usa si no se adjunta archivo',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo de imagen a subir a Supabase',
+        },
+      },
+    },
+  })
   @ApiCreatedResponse({ description: 'Imagen creada correctamente.' })
   @ApiNotFoundResponse({ description: 'Modelo no encontrado.' })
+  @UseInterceptors(AnyFilesInterceptor())
   @Post()
-  create(@Body() createDto: CreateVehiculoImagenDto) {
-    return this.vehiculoImagenService.create(createDto);
+  create(
+    @Body() createDto: CreateVehiculoImagenDto,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
+    const file = files?.find((item) =>
+      ['file', 'imagen', 'image'].includes(item.fieldname),
+    );
+
+    return this.vehiculoImagenService.create(createDto, file ?? files?.[0]);
   }
 
   @ApiOperation({ summary: 'Listar todas las imágenes' })

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsUrl, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUrl, IsUUID } from 'class-validator';
 
 export class CreateVehiculoImagenDto {
   @ApiProperty({
@@ -11,10 +11,12 @@ export class CreateVehiculoImagenDto {
   modeloId: string;
 
   @ApiProperty({
-    description: 'URL de la imagen',
+    description: 'URL de la imagen (opcional si se adjunta archivo)',
     example: 'https://cdn.rentcar.com/vehiculos/rav4-front.jpg',
+    required: false,
   })
+  @IsOptional()
   @IsUrl()
   @IsNotEmpty()
-  url: string;
+  url?: string;
 }

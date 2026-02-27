@@ -17,15 +17,26 @@ export class SupabaseStorageService {
       );
     }
 
-    this.bucketName = process.env.SUPABASE_BUCKET_VEHICULOS ?? 'vehiculos';
+    this.bucketName =
+      process.env.SUPABASE_BUCKET_MODELOS ??
+      process.env.SUPABASE_BUCKET_VEHICULOS ??
+      'modelos';
     this.client = createClient(supabaseUrl, supabaseServiceRoleKey);
   }
 
-  async uploadVehiculoImagen(file: Express.Multer.File, vehiculoId: string) {
+  async uploadModeloImagen(file: Express.Multer.File, modeloId: string) {
+    return this.uploadImagen(file, 'modelos', modeloId);
+  }
+
+  private async uploadImagen(
+    file: Express.Multer.File,
+    folder: string,
+    ownerId: string,
+  ) {
     const extension = extname(file.originalname) || '.jpg';
     const randomPart = Math.random().toString(36).slice(2, 10);
     const fileName = `${Date.now()}-${randomPart}${extension}`;
-    const storagePath = `vehiculos/${vehiculoId}/${fileName}`;
+    const storagePath = `${folder}/${ownerId}/${fileName}`;
 
     const { error } = await this.client.storage
       .from(this.bucketName)

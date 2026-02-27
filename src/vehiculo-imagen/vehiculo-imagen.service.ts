@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ModeloImagen } from '../vehiculo/entities/vehiculo-imagen.entity';
 import { Modelo } from '../modelo/entities/modelo.entity';
 import { CreateVehiculoImagenDto } from './dto/create-vehiculo-imagen.dto';
 import { UpdateVehiculoImagenDto } from './dto/update-vehiculo-imagen.dto';
+import { SupabaseStorageService } from '../storage/supabase-storage.service';
 
 @Injectable()
 export class VehiculoImagenService {
@@ -13,6 +18,7 @@ export class VehiculoImagenService {
     private readonly modeloImagenRepository: Repository<ModeloImagen>,
     @InjectRepository(Modelo)
     private readonly modeloRepository: Repository<Modelo>,
+    private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
   private async getModeloOrFail(modeloId: string): Promise<Modelo> {
@@ -27,11 +33,27 @@ export class VehiculoImagenService {
     return modelo;
   }
 
-  async create(createDto: CreateVehiculoImagenDto) {
+  async create(createDto: CreateVehiculoImagenDto, file?: Express.Multer.File) {
     const modelo = await this.getModeloOrFail(createDto.modeloId);
 
+    let imagenUrl = createDto.url;
+
+    if (file) {
+      const uploadResult = await this.supabaseStorageService.uploadModeloImagen(
+        file,
+        createDto.modeloId,
+      );
+      imagenUrl = uploadResult.publicUrl;
+    }
+
+    if (!imagenUrl) {
+      throw new BadRequestException(
+        'Debe enviar un archivo (file) o una URL de imagen',
+      );
+    }
+
     const imagen = this.modeloImagenRepository.create({
-      url: createDto.url,
+      url: imagenUrl,
       modelo,
     });
 
